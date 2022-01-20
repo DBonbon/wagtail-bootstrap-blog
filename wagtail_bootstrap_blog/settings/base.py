@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'wagtail.admin',
     'wagtail.core',
     'wagtail.contrib.routable_page',
-    'wagtail.contrib.postgres_search',
+    #'wagtail.contrib.postgres_search',
     'wagtail.contrib.modeladmin',
 
     'modelcluster',
@@ -108,15 +108,12 @@ WSGI_APPLICATION = 'wagtail_bootstrap_blog.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
-        "USER": os.environ.get("SQL_USER", "user"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
-        "HOST": os.environ.get("SQL_HOST", "localhost"),
-        "PORT": os.environ.get("SQL_PORT", "5432"),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 
 # Password validation
@@ -185,11 +182,12 @@ WAGTAIL_SITE_NAME = "wagtail_bootstrap_blog"
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'http://example.com'
 
-WAGTAILSEARCH_BACKENDS = {
+"""WAGTAILSEARCH_BACKENDS = {
     'default': {
         'BACKEND': 'wagtail.contrib.postgres_search.backend',
     },
 }
+"""
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -201,3 +199,5 @@ WEBPACK_LOADER = {
 SITE_ID = 1
 
 COMMENTS_APP = 'custom_comments'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
