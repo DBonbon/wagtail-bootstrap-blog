@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from django.shortcuts import render
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.utils.functional import cached_property
 from django.http import Http404
@@ -35,24 +36,21 @@ class BlogPage(RoutablePageMixin, Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        # context['blog_page'] = self
+        context= PostPage.objects.live().public()
+        #context['blog_page'] = self
 
-        # https://docs.djangoproject.com/en/3.1/topics/pagination/#using-paginator-in-a-view-function
-        paginator = Paginator(self.posts, 2)
-        page = request.GET.get("page")
-        try:
-            posts = paginator.page(page)
-        except PageNotAnInteger:
-            posts = paginator.page(1)
-        except EmptyPage:
-            posts = paginator.object_list.none()
-
-        context["posts"] = posts
         return context
 
     def get_posts(self):
         return PostPage.objects.descendant_of(self).live().order_by("-post_date")
 
+    
+    @route(r"^latest/$")
+    def blog_latest_posts(self, request, *args, **kwargs):
+        context=self.get_context(request, *args, **kwargs)
+        
+        return render(request, 'blog/latest_posts.html', context)
+        
     @route(r"^(\d{4})/(\d{2})/(\d{2})/(.+)/$")
     def post_by_date_slug(self, request, year, month, day, slug, *args, **kwargs):
         post_page = self.get_posts().filter(slug=slug).first()
