@@ -13,23 +13,36 @@
     </div>
   {% endif %}
 
+<ul class="list-unstyled mb-0">
+          {% for category in categories %}
+            <li>
+              <a href="{#% routablepageurl blog_page "post_by_category" category.slug %#}" class="link-primary text-decoration-none">
+                {{ category.name }}
+              </a>
+            </li>
+          {% empty %}
+            'No categories yet'
+          {% endfor %}
+        </ul>
+
+
   {% for post in posts %}
     <div class="card mb-4">
       {% if post.header_image %}
         {% image post.header_image original as header_image %}
-        <a href="{% post_page_date_slug_url post blog_page %}">
+        <a href="{#% post_page_date_slug_url post blog_page %#}">
           <img src="{{ header_image.url }}" class="card-img-top">
         </a>
       {% endif %}
 
       <div class="card-body">
         <h2 class="card-title">
-          <a class="text-decoration-none" href="{% post_page_date_slug_url post blog_page %}">{{ post.title }}</a>
+          <a class="text-decoration-none" href="{#% post_page_date_slug_url post blog_page %#}">{{ post.title }}</a>
         </h2>
         <p class="card-text">
           {{ post.description }}
         </p>
-        <a href="{% post_page_date_slug_url post blog_page %}" class="btn btn-primary">Read More &rarr;</a>
+        <a href="{#% post_page_date_slug_url post blog_page %#}" class="btn btn-primary">Read More &rarr;</a>
 
       </div>
 
@@ -40,6 +53,7 @@
     </div>
   {% endfor %}
 
+<!--
   {# Pagination #}
   {# https://docs.djangoproject.com/en/3.1/topics/pagination/#paginating-a-listview #}
   <ul class="pagination">
@@ -71,5 +85,7 @@
       </li>
     {% endif %}
   </ul>
+  
+ -->
 
 {% endblock %}

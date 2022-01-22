@@ -39,6 +39,7 @@ class BlogPage(RoutablePageMixin, Page):
         context['posts'] = PostPage.objects.live().public()
         context['blog_page'] = self
         context['regular_context_var']='Hello worlds 12345453'
+        context['categories']=BlogCategory.objects.all()
         return context
         
         #context['posts'] = posts
@@ -53,6 +54,13 @@ class BlogPage(RoutablePageMixin, Page):
         context["posts"]=context["posts"][:1]
         return render(request, 'blog/latest_posts.html', context)
         
+    @route(r'^category/(?P<category>[-\w]+)/$')
+    def post_by_category(self, request, category):
+        
+        context = self.get_context(request)
+        #context["posts"]=context["posts"][:1]
+        return render(request, 'blog/blog_page.html', context)
+        
   
     @route(r'^tag/(?P<tag>[-\w]+)/$')
     def post_by_tag(self, request, tag, *args, **kwargs):
@@ -62,12 +70,12 @@ class BlogPage(RoutablePageMixin, Page):
         return Page.serve(self, request, *args, **kwargs)
         #return self.render(request)
 
-    @route(r'^category/(?P<category>[-\w]+)/$')
+    """@route(r'^category/(?P<category>[-\w]+)/$')
     def post_by_category(self, request, category, *args, **kwargs):
         self.search_type = 'category'
         self.search_term = category
         self.posts = self.get_posts().filter(categories__slug=category)
-        return Page.serve(self, request, *args, **kwargs)
+        return Page.serve(self, request, *args, **kwargs)"""
 
     @route(r'^$')
     def post_list(self, request, *args, **kwargs):
