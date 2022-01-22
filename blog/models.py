@@ -36,19 +36,21 @@ class BlogPage(RoutablePageMixin, Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        #context['posts'] = PostPage.live().public()
+        context['posts'] = PostPage.objects.live().public()
+        context['blog_page'] = self
         context['regular_context_var']='Hello worlds 12345453'
         return context
-        #context['blog_page'] = self
+        
         #context['posts'] = posts
         
     def get_posts(self):
         return PostPage.objects.descendant_of(self).live()
-
+    
     @route(r'^latest/$')
     def latest_posts(self, request, *args, **kwargs):
-        context = self.get_context(request, *args, **kwargs)
         
+        context = self.get_context(request, *args, **kwargs)
+        context["posts"]=context["posts"][:1]
         return render(request, 'blog/latest_posts.html', context)
         
   
