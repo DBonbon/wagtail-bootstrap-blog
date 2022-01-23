@@ -1,4 +1,5 @@
 {% load static wagtailuserbar %}
+{% load wagtailroutablepage_tags %}
 
 <!DOCTYPE html>
 <html class="no-js h-100" lang="en">
@@ -20,9 +21,9 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        {% if page.canonical_url %}
-          <link rel="canonical" href="{{ page.canonical_url }}"/>
-        {% endif %}
+        <!--{#% if page.canonical_url %#}
+          <link rel="canonical" href="{#{ page.canonical_url }#}"/>
+        {#% endif %#}-->
 
         {# Global stylesheets #}
         <link rel="icon" type="image/png" href="{% static 'images/favicon-32x32.png' %}"/>

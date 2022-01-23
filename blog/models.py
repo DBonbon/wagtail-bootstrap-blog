@@ -41,46 +41,57 @@ class BlogPage(RoutablePageMixin, Page):
         context['regular_context_var']='Hello worlds 12345453'
         context['categories']=BlogCategory.objects.all()
         return context
-        
-        #context['posts'] = posts
-        
+
     def get_posts(self):
-        return PostPage.objects.descendant_of(self).live()
-    
+        return PostPage.objects.descendant_of(self).live().order_by("-post_date")
+
     @route(r'^latest/$')
     def latest_posts(self, request, *args, **kwargs):
         
         context = self.get_context(request, *args, **kwargs)
         context["posts"]=context["posts"][:1]
         return render(request, 'blog/latest_posts.html', context)
-        
-    @route(r'^category/(?P<category>[-\w]+)/$')
-    def post_by_category(self, request, category):
-        
-        context = self.get_context(request)
-        #context["posts"]=context["posts"][:1]
-        return render(request, 'blog/blog_page.html', context)
-        
-  
+    
+    @route(r"^(\d{4})/(\d{2})/(\d{2})/(.+)/$")
+    def post_by_date_slug(self, request, year, month, day, slug, *args, **kwargs):
+        post_page = self.get_posts().filter(slug=slug).first()
+        if not post_page:
+            raise Http404
+        # here we render another page, so we call the serve method of the page instance
+        return post_page.serve(request)
+
+    @route(r"^(\d{4})/$")
+    @route(r"^(\d{4})/(\d{2})/$")
+    @route(r"^(\d{4})/(\d{2})/(\d{2})/$")
+    def post_by_date(self, request, year, month=None, day=None, *args, **kwargs):
+        self.filter_type = 'date'
+        self.filter_term = year
+        self.posts = self.get_posts().filter(post_date__year=year)
+        if month:
+            df = DateFormat(datetime.date(int(year), int(month), 1))
+            self.filter_term = df.format('F Y')
+            self.posts = self.posts.filter(post_date__month=month)
+        if day:
+            self.filter_term = date_format(datetime.date(int(year), int(month), int(day)))
+            self.posts = self.posts.filter(post_date__day=day)
+        return self.render(request)
+
     @route(r'^tag/(?P<tag>[-\w]+)/$')
     def post_by_tag(self, request, tag, *args, **kwargs):
-        self.search_type = 'tag'
-        self.search_term = tag
+        self.filter_type = 'tag'
+        self.filter_term = tag
         self.posts = self.get_posts().filter(tags__slug=tag)
-        return Page.serve(self, request, *args, **kwargs)
-        #return self.render(request)
+        return self.render(request)
 
-    """@route(r'^category/(?P<category>[-\w]+)/$')
+    @route(r'^category/(?P<category>[-\w]+)/$')
     def post_by_category(self, request, category, *args, **kwargs):
-        self.search_type = 'category'
-        self.search_term = category
-        self.posts = self.get_posts().filter(categories__slug=category)
-        return Page.serve(self, request, *args, **kwargs)"""
-
-    @route(r'^$')
-    def post_list(self, request, *args, **kwargs):
-        self.posts = self.get_posts()
-        return Page.serve(self, request, *args, **kwargs)
+        self.filter_type = 'category'
+        self.filter_term = category
+        #self.posts = self.get_context().filter(categories__blog_category__slug=category)
+        #return self.render(request)
+        context = self.get_context(request)
+        context["posts"]=self.get_posts().filter(categories__blog_category__slug=category)
+        return render(request, 'blog/blog_page.html', context)
 
     @route(r"^search/$")
     def post_search(self, request, *args, **kwargs):
@@ -91,6 +102,33 @@ class BlogPage(RoutablePageMixin, Page):
             self.filter_type = 'search'
             self.posts = self.posts.search(search_query)
         return self.render(request)
+
+    @route(r'^$')
+    def post_list(self, request, *args, **kwargs):
+        self.posts = self.get_posts()
+        return self.render(request)
+
+    def get_sitemap_urls(self, request=None):
+        output = []
+        posts = self.get_posts()
+        for post in posts:
+            post_date = post.post_date
+            url = self.get_full_url(request) + self.reverse_subpage(
+                'post_by_date_slug',
+                args=(
+                    post_date.year,
+                    '{0:02}'.format(post_date.month),
+                    '{0:02}'.format(post_date.day),
+                    post.slug,
+                )
+            )
+
+            output.append({
+                'location': url,
+                'lastmod': post.last_published_at
+            })
+
+        return output
 
 
 class PostPage(MetadataPageMixin, Page):
@@ -126,14 +164,14 @@ class PostPage(MetadataPageMixin, Page):
         index.SearchField('body'),
     ]
 
-    """def get_context(self, request, *args, **kwargs):
+    def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         # context['blog_page'] = self.blog_page
         return context
 
     @cached_property
     def blog_page(self):
-        return self.get_parent().specific"""
+        return self.get_parent().specific
 
     @cached_property
     def canonical_url(self):

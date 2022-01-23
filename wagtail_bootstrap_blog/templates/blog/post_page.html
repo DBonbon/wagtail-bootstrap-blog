@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load wagtailcore_tags wagtailimages_tags blogapp_tags static wagtailmetadata_tags comments %}
+{% load wagtailroutablepage_tags %}
 
 {% block meta_tag %}
   {% meta_tags %}
@@ -11,19 +12,40 @@
 {% endblock %}
 
 {% block content %}
+{% if page.categories %}
+    <i class="bi bi-tag-fill"></i>
+    {% for category in page.categories.all %}
+        {{ category.blog_category.name }}
+    {% endfor %}
+    &nbsp;
+{% endif %}
+
+<ul class="list-unstyled mb-0">
+          {% for category in page.categories.all %}
+            <li>
+              <a href="{% routablepageurl blog_page "post_by_category" category.blog_category.slug %}" class="link-primary text-decoration-none">
+                {{ category.blog_category.name }}
+              </a>
+            </li>
+          {% empty %}
+            'No categories yet'
+          {% endfor %}
+        </ul>
     {% image page.header_image original as header_image %}
     <img src="{{ header_image.url }}" class="img-fluid">
+
+
 
     <h1>{{ page.title }}</h1>
 
     <p>
-      {% post_categories_list %}
+      {#% post_categories_list %#}
     </p>
 
     {# body #}
     {% include "blog/components/streamfield.html" %}
 
-    {% post_tags_list %}
+    {#% post_tags_list %#}
     <hr>
 
     <div class="mb-4">
