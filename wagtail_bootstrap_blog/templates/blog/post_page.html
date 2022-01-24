@@ -31,10 +31,21 @@
             'No categories yet'
           {% endfor %}
         </ul>
+        
+    {% for tag in page.tags.all %}
+      <a href="{% routablepageurl blog_page "post_by_tag" tag.slug %}" class="text-decoration-none">
+        <span class="badge bg-secondary">{{ tag }}</span>
+      </a>
+    {% empty %}
+      No tags yet
+    {% endfor %}
+    
+        
+    
     {% image page.header_image original as header_image %}
     <img src="{{ header_image.url }}" class="img-fluid">
 
-
+    
 
     <h1>{{ page.title }}</h1>
 

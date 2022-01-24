@@ -40,6 +40,7 @@ class BlogPage(RoutablePageMixin, Page):
         context['blog_page'] = self
         context['regular_context_var']='Hello worlds 12345453'
         context['categories']=BlogCategory.objects.all()
+        context["tags"] = Tag.objects.all()
         return context
 
     def get_posts(self):
@@ -87,8 +88,6 @@ class BlogPage(RoutablePageMixin, Page):
     def post_by_category(self, request, category, *args, **kwargs):
         self.filter_type = 'category'
         self.filter_term = category
-        #self.posts = self.get_context().filter(categories__blog_category__slug=category)
-        #return self.render(request)
         context = self.get_context(request)
         context["posts"]=self.get_posts().filter(categories__blog_category__slug=category)
         return render(request, 'blog/blog_page.html', context)
